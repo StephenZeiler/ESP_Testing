@@ -5,7 +5,7 @@
 #define DIR_PIN    11
 
 // 200 pulses per rev → 180 degrees = 100 pulses
-const int STEPS_180 = 100;
+const int STEPS_180 = 400;
 
 // ---- Fast but STABLE tuning ----
 const int START_PULSE_US = 100;   // safe fast start
