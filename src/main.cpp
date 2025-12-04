@@ -4,12 +4,14 @@
 #define STEP_PIN   10
 #define DIR_PIN    11
 
+// 800 pulses per rev → 180 degrees = 400 pulses
 const int STEPS_180 = 400;
 
-const int START_PULSE_US = 100;
-const int MIN_PULSE_US   = 7;     // <- slowed down slightly
-const int ACCEL_STEPS    = 30;
-const int DECEL_STEPS    = 30;
+// ---- Slower + stronger settings ----
+const int START_PULSE_US = 150;   // slower start, more torque
+const int MIN_PULSE_US   = 10;    // slower top speed, much safer
+const int ACCEL_STEPS    = 50;    // smoother ramp
+const int DECEL_STEPS    = 50;
 
 int usToTicks(int us) {
     return us * 10;   // clk_div = 8 → 1 tick = 0.1us
@@ -79,12 +81,10 @@ void setup() {
 
 void loop() {
 
-    // Forward
     digitalWrite(DIR_PIN, HIGH);
-    delayMicroseconds(20);   // allow DIR to settle
+    delayMicroseconds(20);
     sendStepsAccel(STEPS_180);
 
-    // Backward
     digitalWrite(DIR_PIN, LOW);
     delayMicroseconds(20);
     sendStepsAccel(STEPS_180);
