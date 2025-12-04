@@ -7,7 +7,7 @@
 const int STEPS_180 = 400;
 
 const int START_PULSE_US = 100;
-const int MIN_PULSE_US   = 6;
+const int MIN_PULSE_US   = 7;     // <- slowed down slightly
 const int ACCEL_STEPS    = 30;
 const int DECEL_STEPS    = 30;
 
@@ -81,11 +81,11 @@ void loop() {
 
     // Forward
     digitalWrite(DIR_PIN, HIGH);
-    delayMicroseconds(20);   // 🔥 FIX: allow DIR to settle
+    delayMicroseconds(20);   // allow DIR to settle
     sendStepsAccel(STEPS_180);
 
     // Backward
     digitalWrite(DIR_PIN, LOW);
-    delayMicroseconds(20);   // 🔥 FIX
+    delayMicroseconds(20);
     sendStepsAccel(STEPS_180);
 }
