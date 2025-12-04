@@ -9,7 +9,7 @@ const int STEPS_180 = 100;
 
 // ---- Much faster tuning ----
 const int START_PULSE_US = 80;   // much faster start
-const int MIN_PULSE_US   = 3;    // higher top speed
+const int MIN_PULSE_US = 6;    // higher top speed
 const int ACCEL_STEPS    = 10;   // quicker ramp
 const int DECEL_STEPS    = 10;
 
@@ -72,6 +72,9 @@ void setup() {
 void loop() {
     digitalWrite(DIR_PIN, HIGH);
     sendStepsAccel(STEPS_180);
-    delay(100);
+    //delay(100);
 
     digitalWrite(DIR_PIN, LOW);
+    sendStepsAccel(STEPS_180);
+    //delay(100);
+}
