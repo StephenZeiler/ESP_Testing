@@ -1,8 +1,9 @@
 #include <Arduino.h>
 #include "driver/rmt.h"
 
-#define STEP_PIN   4
-#define DIR_PIN    5
+#define STEP_PIN   10
+#define DIR_PIN    11
+#define EN_PIN     12
 
 // 200 pulses per rev → 180 degrees = 100 steps
 const int STEPS_180 = 50;
