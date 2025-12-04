@@ -4,16 +4,15 @@
 #define STEP_PIN   10
 #define DIR_PIN    11
 
-// 800 pulses per rev → 180 degrees = 400 pulses
 const int STEPS_180 = 400;
 
-const int START_PULSE_US = 100;  // real microseconds
-const int MIN_PULSE_US   = 6;    // real microseconds
+const int START_PULSE_US = 100;
+const int MIN_PULSE_US   = 6;
 const int ACCEL_STEPS    = 30;
 const int DECEL_STEPS    = 30;
 
 int usToTicks(int us) {
-    return us * 10;   // because 1 tick = 0.1 µs
+    return us * 10;   // clk_div = 8 → 1 tick = 0.1us
 }
 
 void setupRMT() {
@@ -26,7 +25,7 @@ void setupRMT() {
     config.tx_config.idle_output_en = true;
     config.tx_config.idle_level = RMT_IDLE_LEVEL_LOW;
     config.tx_config.carrier_en = false;
-    config.clk_div = 8;  // 1 tick = 0.1 µs
+    config.clk_div = 8;
 
     rmt_config(&config);
     rmt_driver_install(config.channel, 0, 0);
@@ -47,12 +46,14 @@ void firePulse(int pulseUS) {
 
 void sendStepsAccel(int totalSteps) {
 
+    // ACCEL
     for (int i = 0; i < ACCEL_STEPS && i < totalSteps; i++) {
         int pulse = START_PULSE_US -
-                    ((START_PULSE_US - MIN_PULSE_US) * i / ACCEL_STEPS);
+                   ((START_PULSE_US - MIN_PULSE_US) * i / ACCEL_STEPS);
         firePulse(pulse);
     }
 
+    // CRUISE
     int cruiseSteps = totalSteps - ACCEL_STEPS - DECEL_STEPS;
     if (cruiseSteps < 0) cruiseSteps = 0;
 
@@ -60,12 +61,13 @@ void sendStepsAccel(int totalSteps) {
         firePulse(MIN_PULSE_US);
     }
 
+    // DECEL
     for (int i = DECEL_STEPS - 1; i >= 0 &&
-         (ACCEL_STEPS + cruiseSteps + (DECEL_STEPS - i - 1) < totalSteps);
-         i--) 
+        (ACCEL_STEPS + cruiseSteps + (DECEL_STEPS - i - 1) < totalSteps);
+        i--)
     {
         int pulse = START_PULSE_US -
-                    ((START_PULSE_US - MIN_PULSE_US) * i / DECEL_STEPS);
+                   ((START_PULSE_US - MIN_PULSE_US) * i / DECEL_STEPS);
         firePulse(pulse);
     }
 }
@@ -77,13 +79,13 @@ void setup() {
 
 void loop() {
 
-    // Move +180 degrees
+    // Forward
     digitalWrite(DIR_PIN, HIGH);
+    delayMicroseconds(20);   // 🔥 FIX: allow DIR to settle
     sendStepsAccel(STEPS_180);
-    delay(100);
 
-    // Move -180 degrees
+    // Backward
     digitalWrite(DIR_PIN, LOW);
+    delayMicroseconds(20);   // 🔥 FIX
     sendStepsAccel(STEPS_180);
-    delay(100);
 }
