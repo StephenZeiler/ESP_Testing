@@ -5,14 +5,13 @@
 #define DIR_PIN    11
 #define EN_PIN     12
 
-// 200 pulses per rev → 180 degrees = 100 steps
 const int STEPS_180 = 100;
 
-// ---- Motion tuning (50% faster) ----
-const int START_PULSE_US = 120;    // was 200 → faster launch
-const int MIN_PULSE_US   = 4;      // was 6 → faster top speed
-const int ACCEL_STEPS    = 20;     // was 30 → faster ramp
-const int DECEL_STEPS    = 20;     // was 30
+// ---- Much faster tuning ----
+const int START_PULSE_US = 80;   // much faster start
+const int MIN_PULSE_US   = 3;    // higher top speed
+const int ACCEL_STEPS    = 10;   // quicker ramp
+const int DECEL_STEPS    = 10;
 
 void setupRMT() {
     rmt_config_t config;
@@ -24,7 +23,7 @@ void setupRMT() {
     config.tx_config.idle_output_en = true;
     config.tx_config.idle_level = RMT_IDLE_LEVEL_LOW;
     config.tx_config.carrier_en = false;
-    config.clk_div = 8;  // 10MHz resolution
+    config.clk_div = 8;
 
     rmt_config(&config);
     rmt_driver_install(config.channel, 0, 0);
@@ -36,21 +35,18 @@ void firePulse(int pulseWidth) {
     item.duration0 = pulseWidth;
     item.level1 = 0;
     item.duration1 = pulseWidth;
-
     rmt_write_items(RMT_CHANNEL_0, &item, 1, false);
     rmt_wait_tx_done(RMT_CHANNEL_0, portMAX_DELAY);
 }
 
 void sendStepsAccel(int totalSteps) {
 
-    // ---- 1. ACCELERATION ----
     for (int i = 0; i < ACCEL_STEPS && i < totalSteps; i++) {
-        int pulse = START_PULSE_US - 
+        int pulse = START_PULSE_US -
                     ((START_PULSE_US - MIN_PULSE_US) * i / ACCEL_STEPS);
         firePulse(pulse);
     }
 
-    // ---- 2. CRUISE ----
     int cruiseSteps = totalSteps - ACCEL_STEPS - DECEL_STEPS;
     if (cruiseSteps < 0) cruiseSteps = 0;
 
@@ -58,10 +54,9 @@ void sendStepsAccel(int totalSteps) {
         firePulse(MIN_PULSE_US);
     }
 
-    // ---- 3. DECELERATION ----
     for (int i = DECEL_STEPS - 1; i >= 0 && 
-        (ACCEL_STEPS + cruiseSteps + (DECEL_STEPS - i - 1) < totalSteps); 
-        i--) 
+         (ACCEL_STEPS + cruiseSteps + (DECEL_STEPS - i - 1) < totalSteps);
+         i--) 
     {
         int pulse = START_PULSE_US -
                     ((START_PULSE_US - MIN_PULSE_US) * i / DECEL_STEPS);
@@ -75,13 +70,8 @@ void setup() {
 }
 
 void loop() {
-    // Move +180
     digitalWrite(DIR_PIN, HIGH);
     sendStepsAccel(STEPS_180);
-    delay(200);
+    delay(100);
 
-    // Move -180
     digitalWrite(DIR_PIN, LOW);
-    sendStepsAccel(STEPS_180);
-    delay(200);
-}
