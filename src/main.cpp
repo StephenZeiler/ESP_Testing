@@ -8,11 +8,11 @@
 // 200 pulses per rev → 180 degrees = 100 steps
 const int STEPS_180 = 100;
 
-// ---- Motion tuning ----
-const int START_PULSE_US = 200;     // slow start (200µs high/low ≈ 2.5 kHz)
-const int MIN_PULSE_US   = 6;       // top speed (6µs high/low ≈ 85 kHz)
-const int ACCEL_STEPS    = 30;      // how many steps to accelerate
-const int DECEL_STEPS    = 30;      // how many to decelerate
+// ---- Motion tuning (50% faster) ----
+const int START_PULSE_US = 120;    // was 200 → faster launch
+const int MIN_PULSE_US   = 4;      // was 6 → faster top speed
+const int ACCEL_STEPS    = 20;     // was 30 → faster ramp
+const int DECEL_STEPS    = 20;     // was 30
 
 void setupRMT() {
     rmt_config_t config;
@@ -45,9 +45,8 @@ void sendStepsAccel(int totalSteps) {
 
     // ---- 1. ACCELERATION ----
     for (int i = 0; i < ACCEL_STEPS && i < totalSteps; i++) {
-        // Linearly decrease pulse width from START_PULSE_US → MIN_PULSE_US
         int pulse = START_PULSE_US - 
-                    ( (START_PULSE_US - MIN_PULSE_US) * i / ACCEL_STEPS );
+                    ((START_PULSE_US - MIN_PULSE_US) * i / ACCEL_STEPS);
         firePulse(pulse);
     }
 
@@ -60,9 +59,12 @@ void sendStepsAccel(int totalSteps) {
     }
 
     // ---- 3. DECELERATION ----
-    for (int i = DECEL_STEPS - 1; i >= 0 && (ACCEL_STEPS + cruiseSteps + (DECEL_STEPS - i - 1)) < totalSteps; i--) {
-        int pulse = START_PULSE_US - 
-                    ( (START_PULSE_US - MIN_PULSE_US) * i / DECEL_STEPS );
+    for (int i = DECEL_STEPS - 1; i >= 0 && 
+        (ACCEL_STEPS + cruiseSteps + (DECEL_STEPS - i - 1) < totalSteps); 
+        i--) 
+    {
+        int pulse = START_PULSE_US -
+                    ((START_PULSE_US - MIN_PULSE_US) * i / DECEL_STEPS);
         firePulse(pulse);
     }
 }
