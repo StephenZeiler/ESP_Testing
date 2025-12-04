@@ -78,8 +78,9 @@ void loop() {
     // Move +180 degrees
     digitalWrite(DIR_PIN, HIGH);
     sendStepsAccel(STEPS_180);
-
+    delay(100);
     // Move -180 degrees
     digitalWrite(DIR_PIN, LOW);
     sendStepsAccel(STEPS_180);
+    delay(100);
 }
