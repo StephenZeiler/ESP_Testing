@@ -5,7 +5,7 @@
 #define DIR_PIN    5
 
 // 200 pulses per rev → 180 degrees = 100 steps
-const int STEPS_180 50;
+const int STEPS_180 = 50;
 
 // Pulse width controls speed (in microseconds)
 const int PULSE_US = 3;
